@@ -1,85 +1,94 @@
-### Implementação em Javascript Heurística do Vizinho Mais Proximo
+### Implementação em Javascript vizinho mais proximo
 
-- Esta função **`distancia`** calcula a distância euclidiana entre duas cidades representadas como coordenadas (x, y) no espaço bidimensional.
+**Inicialização:**
 
 ```jsx
-function distancia(cidade1, cidade2) {
-    const dx = cidade1[0] - cidade2[0];
-    const dy = cidade1[1] - cidade2[1];
-    return Math.sqrt(dx * dx + dy * dy);
-}
+// Inicializa o algoritmo com um grafo que representa as distâncias entre cidades.
+function vizinhoMaisProximo(grafo) {
+  const numCidades = grafo.length; // Obtém o número de cidades no grafo
+  const rota = [1]; // Inicia a rota com o nó 1 (cidade de origem)
+  let distancia = 0; // Inicializa a distância total percorrida como 0
+  let i = 0; // Inicializa o índice da cidade atual na rota
+
 ```
 
-- Função principal para o caixeiro viajante usando o algoritmo do **Vizinho Mais Próximo**
-- Nesta parte, o algoritmo do Vizinho Mais Próximo é implementado. Ele começa de uma cidade inicial e, em cada passo, escolhe a cidade mais próxima que ainda não foi visitada, adicionando-a à rota. O loop continua até todas as cidades serem visitadas.
+**Loop Principal:**
 
 ```jsx
 
-function caixeiro_viajante_vizinho_mais_proximo(cidades) {
-    const n = cidades.length; // Número de cidades
-    const cidade_inicial = 0; // Começa na primeira cidade
-    const rota = [cidade_inicial]; // Inicializa a rota com a primeira cidade
-    const visitadas = new Set([cidade_inicial]); // Conjunto para controlar as cidades visitadas
+  // Enquanto não visitarmos todas as cidades
+  while (rota.length < numCidades) {
+    let cidadeAtual = rota[i]; // Obtém a cidade atual
+    let menorDistancia = Infinity; // Inicializa a menor distância como infinito
+    let cidadeMaisProxima = null; // Inicializa a cidade mais próxima como nula
 
-    while (rota.length < n) {
-        const cidade_atual = rota[rota.length - 1]; // A última cidade visitada na rota
-        let distancia_minima = Infinity;
-        let cidade_proxima = null;
+```
 
-        // Percorre todas as cidades para encontrar a mais próxima
-        for (let proxima_cidade = 0; proxima_cidade < n; proxima_cidade++) {
-            if (!visitadas.has(proxima_cidade)) {
-                const dist = distancia(cidades[cidade_atual], cidades[proxima_cidade]);
-                if (dist < distancia_minima) {
-                    distancia_minima = dist;
-                    cidade_proxima = proxima_cidade;
-                }
-            }
+**Busca da Cidade Mais Próxima:**
+
+```jsx
+
+    // Percorre todas as cidades
+    for (let j = 0; j < numCidades; j++) {
+      if (!rota.includes(j + 1)) { // Verifica se a cidade não foi visitada
+        const dist = grafo[cidadeAtual - 1][j]; // Obtém a distância entre as cidades
+        if (dist < menorDistancia) {
+          menorDistancia = dist; // Atualiza a menor distância
+          cidadeMaisProxima = j + 1; // Atualiza a cidade mais próxima
         }
-
-        rota.push(cidade_proxima); // Adiciona a cidade mais próxima à rota
-        visitadas.add(cidade_proxima); // Marca a cidade como visitada
+      }
     }
 
-    rota.push(cidade_inicial); // Retorna à cidade inicial para completar o ciclo
-
-    return rota; // Retorna a rota encontrada
-}
 ```
 
-- Esta função **`calcular_distancia_total`** calcula a distância total percorrida na rota, somando as distâncias entre todas as cidades na rota.
+**Adição da Cidade Mais Próxima à Rota e Atualização da Distância:**
 
 ```jsx
-function calcular_distancia_total(rota, cidades) {
-    let distancia_total = 0;
-    for (let i = 0; i < rota.length - 1; i++) {
-        const cidade_atual = rota[i];
-        const proxima_cidade = rota[i + 1];
-        distancia_total += distancia(cidades[cidade_atual], cidades[proxima_cidade]);
+
+    // Se encontramos uma cidade mais próxima, a adicionamos à rota e atualizamos a distância
+    if (cidadeMaisProxima !== null) {
+      rota.push(cidadeMaisProxima);
+      distancia += menorDistancia;
     }
-    return distancia_total;
-}
+
 ```
 
-- Neste trecho, um exemplo de uso do algoritmo é demonstrado. Cidades aleatórias são geradas, e o algoritmo do Vizinho Mais Próximo é aplicado para encontrar a rota ótima. Em seguida, a rota e a distância total percorrida são exibidas no console.
-- O código geralmente encontra uma solução aproximada para o problema do caixeiro viajante, mas não necessariamente a solução ótima, pois é um algoritmo heurístico.
+**Próxima Cidade na Rota:**
 
 ```jsx
-// Exemplo de uso com um grande número de cidades
-const numero_de_cidades = 50;
-const cidades_aleatorias = [];
 
-// Gerar cidades aleatórias
-for (let i = 0; i < numero_de_cidades; i++) {
-    const x = Math.random() * 100;
-    const y = Math.random() * 100;
-    cidades_aleatorias.push([x, y]);
+    i++; // Passa para a próxima cidade na rota
+  }
+
+```
+
+**Completando o Ciclo e Retornando o Resultado:**
+
+```jsx
+
+  // Voltar para a cidade de origem (nó 1) para completar o ciclo
+  rota.push(1);
+  distancia += grafo[rota[numCidades - 1] - 1][0]; // Adicionar a distância de volta à origem
+
+  return { rota, distancia }; // Retorna a rota encontrada e a distância total
 }
 
-const rota_otima = caixeiro_viajante_vizinho_mais_proximo(cidades_aleatorias);
-const distancia_total_rota = calcular_distancia_total(rota_otima, cidades_aleatorias);
+```
 
-console.log("Rota encontrada pelo algoritmo do Vizinho Mais Próximo:");
-console.log(rota_otima);
-console.log("Distância total da rota encontrada:", distancia_total_rota);
+**Exemplo de Uso:**
+
+```jsx
+
+// Exemplo de uso com um grafo de distâncias entre cidades (matriz de adjacência)
+const grafo = [
+  [0, 29, 20, 21],
+  [29, 0, 15, 18],
+  [20, 15, 0, 28],
+  [21, 18, 28, 0]
+];
+
+const resultado = vizinhoMaisProximo(grafo);
+console.log("Rota:", resultado.rota);
+console.log("Distância total:", resultado.distancia);
+
 ```
