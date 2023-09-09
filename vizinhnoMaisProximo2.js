@@ -1,66 +1,52 @@
-// Heurística do Vizino Mais Próximo
+// Heurística do Vizinho mais Próximo
 
-function distancia(cidade1, cidade2) {
-    const dx = cidade1[0] - cidade2[0];
-    const dy = cidade1[1] - cidade2[1];
-    return Math.sqrt(dx * dx + dy * dy);
-}
+function vizinhoMaisProximo(grafo) {
+  const numCidades = grafo.length; // Obtém o número de cidades no grafo
+  const rota = [1]; // Iniciar a rota com o nó 1 (cidade de origem)
+  let distancia = 0; // Inicializa a distância total percorrida como 0
+  let i = 0; // Inicializa o índice da cidade atual na rota
 
-function caixeiro_viajante_vizinho_mais_proximo(cidades) {
-    const n = cidades.length;
-    const cidade_inicial = 0;
-    const rota = [cidade_inicial];
-    const visitadas = new Set([cidade_inicial]);
+  // Enquanto não visitarmos todas as cidades
+  while (rota.length < numCidades) {
+    let cidadeAtual = rota[i]; // Obtém a cidade atual
+    let menorDistancia = Infinity; // Inicializa a menor distância como infinito
+    let cidadeMaisProxima = null; // Inicializa a cidade mais próxima como nula
 
-    while (rota.length < n) {
-        const cidade_atual = rota[rota.length - 1];
-        let distancia_minima = Infinity;
-        let cidade_proxima = null;
-
-        for (let proxima_cidade = 0; proxima_cidade < n; proxima_cidade++) {
-            if (!visitadas.has(proxima_cidade)) {
-                const dist = distancia(cidades[cidade_atual], cidades[proxima_cidade]);
-                if (dist < distancia_minima) {
-                    distancia_minima = dist;
-                    cidade_proxima = proxima_cidade;
-                }
-            }
+    // Percorre todas as cidades
+    for (let j = 0; j < numCidades; j++) {
+      if (!rota.includes(j + 1)) { // Verifica se a cidade não foi visitada
+        const dist = grafo[cidadeAtual - 1][j]; // Obtém a distância entre as cidades
+        if (dist < menorDistancia) {
+          menorDistancia = dist; // Atualiza a menor distância
+          cidadeMaisProxima = j + 1; // Atualiza a cidade mais próxima
         }
-
-        rota.push(cidade_proxima);
-        visitadas.add(cidade_proxima);
+      }
     }
 
-    rota.push(cidade_inicial);
-
-    return rota;
-}
-
-// Função para calcular a distância total de uma rota
-function calcular_distancia_total(rota, cidades) {
-    let distancia_total = 0;
-    for (let i = 0; i < rota.length - 1; i++) {
-        const cidade_atual = rota[i];
-        const proxima_cidade = rota[i + 1];
-        distancia_total += distancia(cidades[cidade_atual], cidades[proxima_cidade]);
+    // Se encontramos uma cidade mais próxima, a adicionamos à rota e atualizamos a distância
+    if (cidadeMaisProxima !== null) {
+      rota.push(cidadeMaisProxima);
+      distancia += menorDistancia;
     }
-    return distancia_total;
+
+    i++; // Passa para a próxima cidade na rota
+  }
+
+  // Voltar para a cidade de origem (nó 1) para completar o ciclo
+  rota.push(1);
+  distancia += grafo[rota[numCidades - 1] - 1][0]; // Adiciona a distância de volta à origem
+
+  return { rota, distancia }; // Retorna a rota encontrada e a distância total
 }
 
-// Exemplo de uso com um grande número de cidades
-const numero_de_cidades = 50;
-const cidades_aleatorias = [];
+// Exemplo de uso com um grafo de distâncias entre cidades (matriz de adjacência)
+const grafo = [
+  [0, 29, 20, 21],
+  [29, 0, 15, 18],
+  [20, 15, 0, 28],
+  [21, 18, 28, 0]
+];
 
-// Gerar cidades aleatórias
-for (let i = 0; i < numero_de_cidades; i++) {
-    const x = Math.random() * 100;
-    const y = Math.random() * 100;
-    cidades_aleatorias.push([x, y]);
-}
-
-const rota_otima = caixeiro_viajante_vizinho_mais_proximo(cidades_aleatorias);
-const distancia_total_rota = calcular_distancia_total(rota_otima, cidades_aleatorias);
-
-console.log("Rota encontrada pelo algoritmo do Vizinho Mais Próximo:");
-console.log(rota_otima);
-console.log("Distância total da rota encontrada:", distancia_total_rota);
+const resultado = vizinhoMaisProximo(grafo);
+console.log("Rota:", resultado.rota);
+console.log("Distância total:", resultado.distancia);
