@@ -1,3 +1,5 @@
+// Heurística do Vizino Mais Próximo
+
 function distancia(cidade1, cidade2) {
     const dx = cidade1[0] - cidade2[0];
     const dy = cidade1[1] - cidade2[1];
